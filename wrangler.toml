@@ -1,0 +1,28 @@
+name = "test-hot-app"
+compatibility_date = "2025-04-04"
+main = "index.js"
+
+# 用于静态资源配置
+[site]
+bucket = "./"
+include = ["index.html", "welcome.html", "login.html", "register.html", "styles.css", "auth.css", "script.js", "auth.js", "new_script.js"]
+exclude = ["server/node_modules/**/*", ".git/**/*", "node_modules/**/*"]
+
+# 环境变量
+[vars]
+ENVIRONMENT = "production"
+
+# 修改入口点配置
+[build]
+command = ""
+watch_dir = ["server", "."]
+
+# 开发配置
+[dev]
+port = 8787
+local_protocol = "http"
+
+# 启用页面路由重写
+[site.mounts]
+source = "./"
+destination = "/" 

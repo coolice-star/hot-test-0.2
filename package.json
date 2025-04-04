@@ -1,0 +1,13 @@
+{
+  "name": "test-hot-app",
+  "version": "1.0.0",
+  "description": "新闻热点抓取网站",
+  "main": "server/worker.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "wrangler": "^4.7.1"
+  }
+} 
