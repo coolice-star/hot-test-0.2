@@ -2,11 +2,28 @@ name = "test-hot-app"
 compatibility_date = "2025-04-04"
 main = "index.js"
 
-# 用于静态资源配置
+# 静态资源配置 - 更新配置方式
 [site]
 bucket = "./"
-include = ["index.html", "welcome.html", "login.html", "register.html", "styles.css", "auth.css", "script.js", "auth.js", "new_script.js"]
-exclude = ["server/node_modules/**/*", ".git/**/*", "node_modules/**/*"]
+include = [
+  "*.html",
+  "*.css",
+  "*.js",
+  "*.json",
+  "*.png",
+  "*.jpg",
+  "*.gif",
+  "*.svg",
+  "*.ico"
+]
+exclude = [
+  "server/node_modules/**/*",
+  ".git/**/*",
+  "node_modules/**/*",
+  "wrangler.toml",
+  "package.json",
+  "package-lock.json"
+]
 
 # 环境变量
 [vars]
