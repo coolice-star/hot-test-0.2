@@ -1,10 +1,17 @@
 name = "test-hot-app"
-compatibility_date = "2025-04-04"
-main = "index.js"
+main = "new-worker.js"
+compatibility_date = "2023-10-16"
+
+# 静态资源配置
+[site]
+bucket = "./"
+
+# 环境变量
+[vars]
+ENVIRONMENT = "production"
 
 # 静态资源配置 - 更新配置方式
 [site]
-bucket = "./"
 include = [
   "*.html",
   "*.css",
@@ -24,10 +31,6 @@ exclude = [
   "package.json",
   "package-lock.json"
 ]
-
-# 环境变量
-[vars]
-ENVIRONMENT = "production"
 
 # 修改入口点配置
 [build]
