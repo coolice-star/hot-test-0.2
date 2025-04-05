@@ -20,9 +20,4 @@ watch_dir = ["server", "."]
 # 开发配置
 [dev]
 port = 8787
-local_protocol = "http"
-
-# 启用页面路由重写
-[site.mounts]
-source = "./"
-destination = "/" 
+local_protocol = "http" 

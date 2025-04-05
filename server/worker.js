@@ -205,9 +205,25 @@ async function handleApiRequest(request, url) {
 }
 
 // 处理静态资源请求
-async function handleAssetRequest(request, url, env) {
-  // 尝试从静态资源中获取
+async function handleAssetRequest(request, env) {
+  // 获取请求的URL
+  const url = new URL(request.url);
   let path = url.pathname;
+  
+  // 定义默认静态资源及其对应的内容类型
+  const contentTypeMap = {
+    '.html': 'text/html',
+    '.css': 'text/css',
+    '.js': 'application/javascript',
+    '.json': 'application/json',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.gif': 'image/gif',
+    '.svg': 'image/svg+xml',
+    '.ico': 'image/x-icon'
+  };
+  
+  console.log(`请求路径: ${path}`);
   
   // 处理根路径 - 默认返回welcome.html
   if (path === '/' || path === '') {
@@ -219,17 +235,56 @@ async function handleAssetRequest(request, url, env) {
     path = `${path}.html`;
   }
 
-  // 创建一个新的请求来获取静态资源
-  const assetUrl = new URL(path, request.url);
-  const assetRequest = new Request(assetUrl, request);
+  console.log(`处理后路径: ${path}`);
   
   try {
-    // 使用__STATIC_CONTENT这个特殊变量来访问静态资源
-    // 这是Cloudflare Worker的一个内部机制
-    return await env.__STATIC_CONTENT.fetch(assetRequest);
-  } catch (e) {
-    // 如果找不到静态资源，返回404
-    return new Response('404 - 找不到页面', { status: 404 });
+    // 使用env.__STATIC_CONTENT访问上传的静态资源
+    // 注意：这是Cloudflare Workers Sites的特殊机制
+    const response = await env.__STATIC_CONTENT.fetch(new Request(url));
+    
+    // 如果资源存在，返回它
+    if (response.status === 200) {
+      // 获取文件扩展名，确定内容类型
+      const extension = path.substring(path.lastIndexOf('.') || 0);
+      const contentType = contentTypeMap[extension] || 'text/plain';
+      
+      // 创建新的响应以添加适当的内容类型
+      const newHeaders = new Headers(response.headers);
+      newHeaders.set('Content-Type', contentType);
+      
+      return new Response(response.body, {
+        status: 200,
+        headers: newHeaders
+      });
+    }
+    
+    // 如果是404，尝试回退到welcome.html
+    if (path !== '/welcome.html') {
+      console.log(`资源不存在，尝试回退到welcome.html`);
+      return handleAssetRequest(new Request(new URL('/welcome.html', request.url)), env);
+    }
+    
+    return response;
+  } catch (error) {
+    console.error(`获取静态资源失败: ${path}`, error);
+    
+    // 如果是根路径的请求，尝试直接返回welcome.html的内容
+    if (path === '/welcome.html') {
+      return new Response('找不到欢迎页面', {
+        status: 404,
+        headers: { 'Content-Type': 'text/plain' }
+      });
+    }
+    
+    // 对于其他路径，尝试回退到welcome.html
+    try {
+      return handleAssetRequest(new Request(new URL('/welcome.html', request.url)), env);
+    } catch (fallbackError) {
+      return new Response('找不到页面', {
+        status: 404,
+        headers: { 'Content-Type': 'text/plain' }
+      });
+    }
   }
 }
 
@@ -237,6 +292,7 @@ async function handleAssetRequest(request, url, env) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    console.log(`收到请求: ${url.pathname}`);
     
     // 处理CORS预检请求
     if (request.method === "OPTIONS") {
@@ -250,7 +306,7 @@ export default {
     }
     
     // 处理静态资源请求
-    const response = await handleAssetRequest(request, url, env);
+    const response = await handleAssetRequest(request, env);
     return addCorsHeaders(response);
   }
 }; 
